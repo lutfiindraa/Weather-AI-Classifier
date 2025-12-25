@@ -7,7 +7,7 @@ import plotly.express as px
 from datetime import datetime
 import os
 import colorsys
-
+import gdown # TAMBAHAN: Import library gdown
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(
@@ -17,6 +17,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- TAMBAHAN: KONFIGURASI ID GOOGLE DRIVE ---
+# Masukkan ID File (bukan ID Folder) dari link Google Drive masing-masing model
+MODEL_DRIVE_IDS = {
+    'model_base_cnn.keras': 'https://drive.google.com/file/d/1XS-me_zBmTh2897EAnDuE83aVCEjMKg4/view?usp=drive_link',       # Contoh: '1A2b3C...'
+    'model_mobilenet.keras': 'https://drive.google.com/file/d/1eqO0NkDxHafFaA057rLP1-z2St-4P1XM/view?usp=drive_link',
+    'model_resnet.keras': 'https://drive.google.com/file/d/1jIc9gCh0r-6jwS7oJGsrcH2Y8b2EWDS9/view?usp=drive_link'
+}
 
 # --- FUNGSI EKSTRAKSI WARNA DOMINAN ---
 def get_dominant_colors(image, n_colors=3):
@@ -334,32 +341,54 @@ WEATHER_INFO = {
 }
 
 
-# --- FUNGSI LOAD MODEL ---
+# --- FUNGSI LOAD MODEL (DIMODIFIKASI UNTUK AUTO-DOWNLOAD) ---
 @st.cache_resource
 def load_prediction_models():
     base_dir = os.path.dirname(os.path.abspath(__file__))
+    model_dir = os.path.join(base_dir, 'model')
     
-    path_base = os.path.join(base_dir, 'model', 'model_base_cnn.keras')
-    path_mobile = os.path.join(base_dir, 'model', 'model_mobilenet.keras')
-    path_resnet = os.path.join(base_dir, 'model', 'model_resnet.keras')
+    # Buat folder model jika belum ada (penting untuk Streamlit Cloud)
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+
+    # Definisi path lokal
+    path_base = os.path.join(model_dir, 'model_base_cnn.keras')
+    path_mobile = os.path.join(model_dir, 'model_mobilenet.keras')
+    path_resnet = os.path.join(model_dir, 'model_resnet.keras')
     
-    models = {}
+    # Logic Auto-Download dengan gdown
+    files_to_check = {
+        path_base: MODEL_DRIVE_IDS.get('model_base_cnn.keras'),
+        path_mobile: MODEL_DRIVE_IDS.get('model_mobilenet.keras'),
+        path_resnet: MODEL_DRIVE_IDS.get('model_resnet.keras')
+    }
+
     try:
-        if not os.path.exists(path_base):
-            if os.path.exists(path_base.replace('.keras', '.h5')):
-                st.error("⚠️ File model masih berformat .h5! Harap jalankan ulang notebook dan simpan sebagai .keras")
-            else:
-                st.error(f"❌ File tidak ditemukan: {path_base}")
-            return None
-            
+        # Cek file satu per satu, download jika tidak ada
+        for file_path, drive_id in files_to_check.items():
+            if not os.path.exists(file_path):
+                if drive_id and drive_id != 'ISI_ID_FILE_DISINI': # Pastikan ID sudah diisi
+                    file_name = os.path.basename(file_path)
+                    st.info(f"📥 Mengunduh model {file_name} dari Google Drive... (Hanya sekali)")
+                    url = f'https://drive.google.com/uc?id={drive_id}'
+                    gdown.download(url, file_path, quiet=False)
+                else:
+                    st.warning(f"⚠️ Model {os.path.basename(file_path)} tidak ditemukan lokal dan ID Drive belum dikonfigurasi.")
+        
+        # Load Model
+        models = {}
         with st.spinner('🔄 Memuat Model AI...'):
-            models['CNN Base'] = tf.keras.models.load_model(path_base)
-            models['MobileNetV2'] = tf.keras.models.load_model(path_mobile)
-            models['ResNet50V2'] = tf.keras.models.load_model(path_resnet)
+            if os.path.exists(path_base):
+                models['CNN Base'] = tf.keras.models.load_model(path_base)
+            if os.path.exists(path_mobile):
+                models['MobileNetV2'] = tf.keras.models.load_model(path_mobile)
+            if os.path.exists(path_resnet):
+                models['ResNet50V2'] = tf.keras.models.load_model(path_resnet)
             
     except Exception as e:
         st.error(f"❌ Gagal memuat model. Error: {e}")
         return None
+    
     return models
 
 
@@ -412,7 +441,7 @@ with st.sidebar:
 # Load Models
 models_dict = load_prediction_models()
 
-if models_dict is None:
+if not models_dict:
     st.error("⚠️ Aplikasi berhenti karena model gagal dimuat.")
     st.stop()
 
@@ -434,7 +463,7 @@ if page == "🔍 Single Prediction":
         selected_model_name = st.selectbox(
             "Pilih Model AI:",
             list(models_dict.keys()),
-            index=1,
+            index=1 if 'MobileNetV2' in models_dict else 0,
             help="MobileNetV2 direkomendasikan untuk performa terbaik"
         )
         
@@ -643,82 +672,87 @@ elif page == "⚖️ Model Comparison":
             
             for col, name, icon in zip(cols, model_names, model_icons):
                 with col:
-                    result = results[name]
-                    weather_data = WEATHER_INFO[result['label']]
-                    
-                    # Status color
-                    if result['confidence'] > 80:
-                        status_color = "#11998e"
-                    elif result['confidence'] > 50:
-                        status_color = "#f093fb"
-                    else:
-                        status_color = "#fa709a"
-                    
-                    st.markdown(f"""
-                        <div class="metric-card" style="border-top: 4px solid {status_color};">
-                            <div style="text-align: center;">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">{icon}</div>
-                                <h3 style="margin: 0.5rem 0; color: {status_color};">{name}</h3>
-                                <div style="font-size: 2.5rem; margin: 1rem 0;">{weather_data['icon']}</div>
-                                <h2 style="margin: 0.5rem 0; color: var(--text-primary);">{result['label']}</h2>
-                                <div style="font-size: 2rem; font-weight: bold; color: {status_color}; margin: 1rem 0;">
-                                    {result['confidence']:.1f}%
+                    # Cek apakah model tersedia dalam dictionary
+                    if name in results:
+                        result = results[name]
+                        weather_data = WEATHER_INFO[result['label']]
+                        
+                        # Status color
+                        if result['confidence'] > 80:
+                            status_color = "#11998e"
+                        elif result['confidence'] > 50:
+                            status_color = "#f093fb"
+                        else:
+                            status_color = "#fa709a"
+                        
+                        st.markdown(f"""
+                            <div class="metric-card" style="border-top: 4px solid {status_color};">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">{icon}</div>
+                                    <h3 style="margin: 0.5rem 0; color: {status_color};">{name}</h3>
+                                    <div style="font-size: 2.5rem; margin: 1rem 0;">{weather_data['icon']}</div>
+                                    <h2 style="margin: 0.5rem 0; color: var(--text-primary);">{result['label']}</h2>
+                                    <div style="font-size: 2rem; font-weight: bold; color: {status_color}; margin: 1rem 0;">
+                                        {result['confidence']:.1f}%
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    """, unsafe_allow_html=True)
-                    
-                    # Mini Bar Chart
-                    top_3_indices = result['probs'].argsort()[-3:][::-1]
-                    top_3_probs = result['probs'][top_3_indices] * 100
-                    top_3_labels = [CLASS_NAMES[i] for i in top_3_indices]
-                    
-                    fig = go.Figure(go.Bar(
-                        x=top_3_probs,
-                        y=top_3_labels,
-                        orientation='h',
-                        marker_color=status_color,
-                        text=[f'{p:.1f}%' for p in top_3_probs],
-                        textposition='outside'
-                    ))
-                    
-                    fig.update_layout(
-                        height=200,
-                        showlegend=False,
-                        template="plotly_dark" if st.get_option("theme.base") == "dark" else "plotly_white",
-                        margin=dict(l=0, r=60, t=10, b=10),
-                        xaxis_showticklabels=False,
-                        yaxis=dict(autorange="reversed")
-                    )
-                    
-                    st.plotly_chart(fig, use_container_width=True, key=f"mini_chart_{name}")
+                        """, unsafe_allow_html=True)
+                        
+                        # Mini Bar Chart
+                        top_3_indices = result['probs'].argsort()[-3:][::-1]
+                        top_3_probs = result['probs'][top_3_indices] * 100
+                        top_3_labels = [CLASS_NAMES[i] for i in top_3_indices]
+                        
+                        fig = go.Figure(go.Bar(
+                            x=top_3_probs,
+                            y=top_3_labels,
+                            orientation='h',
+                            marker_color=status_color,
+                            text=[f'{p:.1f}%' for p in top_3_probs],
+                            textposition='outside'
+                        ))
+                        
+                        fig.update_layout(
+                            height=200,
+                            showlegend=False,
+                            template="plotly_dark" if st.get_option("theme.base") == "dark" else "plotly_white",
+                            margin=dict(l=0, r=60, t=10, b=10),
+                            xaxis_showticklabels=False,
+                            yaxis=dict(autorange="reversed")
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True, key=f"mini_chart_{name}")
             
             # Comparison Analysis
             st.markdown("---")
             st.markdown("## 📊 Analisis Perbandingan Lengkap")
             
             # Agreement Analysis
-            predictions = [results[name]['label'] for name in model_names]
-            if len(set(predictions)) == 1:
-                agreement_status = "✅ Semua model sepakat!"
-                agreement_color = "#11998e"
-            elif len(set(predictions)) == 2:
-                agreement_status = "⚠️ Prediksi model berbeda"
-                agreement_color = "#f5576c"
-            else:
-                agreement_status = "❌ Semua model berbeda"
-                agreement_color = "#fa709a"
+            valid_models = [name for name in model_names if name in results]
+            predictions = [results[name]['label'] for name in valid_models]
             
-            st.markdown(f"""
-                <div class="info-card" style="border-left-color: {agreement_color};">
-                    <strong>{agreement_status}</strong><br>
-                    Konsistensi prediksi antar model penting untuk validasi hasil.
-                </div>
-            """, unsafe_allow_html=True)
+            if predictions:
+                if len(set(predictions)) == 1:
+                    agreement_status = "✅ Semua model sepakat!"
+                    agreement_color = "#11998e"
+                elif len(set(predictions)) == 2:
+                    agreement_status = "⚠️ Prediksi model berbeda"
+                    agreement_color = "#f5576c"
+                else:
+                    agreement_status = "❌ Semua model berbeda"
+                    agreement_color = "#fa709a"
+                
+                st.markdown(f"""
+                    <div class="info-card" style="border-left-color: {agreement_color};">
+                        <strong>{agreement_status}</strong><br>
+                        Konsistensi prediksi antar model penting untuk validasi hasil.
+                    </div>
+                """, unsafe_allow_html=True)
             
             # Detailed Comparison Table
             comparison_data = []
-            for name in model_names:
+            for name in valid_models:
                 result = results[name]
                 comparison_data.append({
                     'Model': name,
@@ -734,21 +768,21 @@ elif page == "⚖️ Model Comparison":
             st.markdown("### 🎯 Radar Comparison - Top 5 Classes")
             
             # Ambil top 5 kelas berdasarkan rata-rata probabilitas
-            avg_probs = np.mean([results[name]['probs'] for name in model_names], axis=0)
+            avg_probs = np.mean([results[name]['probs'] for name in valid_models], axis=0)
             top_5_global = avg_probs.argsort()[-5:][::-1]
             categories = [CLASS_NAMES[i] for i in top_5_global]
             
             fig_radar = go.Figure()
             
             colors_radar = ['#667eea', '#f093fb', '#11998e']
-            for i, name in enumerate(model_names):
+            for i, name in enumerate(valid_models):
                 probs_selected = results[name]['probs'][top_5_global] * 100
                 fig_radar.add_trace(go.Scatterpolar(
                     r=probs_selected,
                     theta=categories,
                     fill='toself',
                     name=name,
-                    line_color=colors_radar[i]
+                    line_color=colors_radar[i % len(colors_radar)]
                 ))
             
             fig_radar.update_layout(
@@ -770,7 +804,7 @@ elif page == "⚖️ Model Comparison":
             
             perf_col1, perf_col2, perf_col3 = st.columns(3)
             
-            for col, name in zip([perf_col1, perf_col2, perf_col3], model_names):
+            for col, name in zip([perf_col1, perf_col2, perf_col3], valid_models):
                 with col:
                     result = results[name]
                     entropy = -np.sum(result['probs'] * np.log(result['probs'] + 1e-10))
@@ -795,7 +829,7 @@ elif page == "📊 Batch Analysis":
     selected_model_batch = st.selectbox(
         "Pilih Model untuk Batch Analysis:",
         list(models_dict.keys()),
-        index=1
+        index=1 if 'MobileNetV2' in models_dict else 0
     )
     
     uploaded_files = st.file_uploader(
