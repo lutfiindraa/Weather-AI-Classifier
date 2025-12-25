@@ -1,0 +1,17 @@
+# Python cache
+.py[cod]
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environment
+.venv/
+.pdm-python
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Machine Learning artifacts
+*.h5
+*.keras
