@@ -1,15 +1,27 @@
 [project]
 name = "UAP"
 version = "0.1.0"
-description = "Default template for PDM package"
+description = "Streamlit app for machine learning weather classification"
 authors = [
-    {name = "lutfiindraa", email = "lutfiindra958@gmail.com"},
+    { name = "lutfiindraa", email = "lutfiindra958@gmail.com" },
 ]
-dependencies = ["tensorflow>=2.20.0", "numpy>=2.2.6", "pandas>=2.3.3", "matplotlib>=3.10.8", "seaborn>=0.13.2", "scikit-learn>=1.7.2", "ipykernel>=7.1.0", "streamlit>=1.52.2", "plotly>=6.5.0", "streamlit-lottie>=0.0.5", "gdown>=5.2.0"]
+dependencies = [
+    "tensorflow>=2.20.0",
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "matplotlib>=3.10.8",
+    "seaborn>=0.13.2",
+    "scikit-learn>=1.7.2",
+    "ipykernel>=7.1.0",
+    "streamlit>=1.52.2",
+    "plotly>=6.5.0",
+    "streamlit-lottie>=0.0.5",
+    "gdown>=5.2.0"
+]
 requires-python = ">=3.10,<3.11"
 readme = "README.md"
-license = {text = "MIT"}
-
+license = { text = "MIT" }
 
 [tool.pdm]
 distribution = false
+package-mode = false
