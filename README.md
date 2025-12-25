@@ -206,7 +206,7 @@ Dense(11, Softmax) → Output
 - **Loss Curve**: Smooth decrease, indikasi training stabil
 - **Validation Gap**: Minimal (~1.5%), menunjukkan generalization yang baik
 
-#### Confusion Matrix (ResNet50)
+#### Confusion Matrix 
 
 Di bawah ini adalah confusion matrix untuk ketiga model.
 
