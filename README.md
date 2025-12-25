@@ -15,14 +15,18 @@ Sistem klasifikasi otomatis untuk mengenali **11 jenis kondisi cuaca** dari gamb
    - [Latar Belakang Masalah](#-latar-belakang-masalah)
    - [Tujuan Pengembangan](#-tujuan-pengembangan)
 2. [Dataset](#-dataset)
+   - [Sumber Dataset](#-sumber-dataset)
+   - [Karakteristik Dataset](#-karakteristik-dataset)
 3. [Preprocessing & Pemodelan](#-preprocessing--pemodelan)
+   - [Tahap Preprocessing](#-tahap-preprocessing)
+   - [Arsitektur Model](#-arsitektur-model)
 4. [Instalasi](#-instalasi)
 5. [Cara Menggunakan](#-cara-menggunakan)
 6. [Hasil & Analisis Model](#-hasil--analisis-model)
-7. [Demo Streamlit](#-demo-streamlit)
-8. [Link Demo Live](#-link-demo-live)
-9. [Tentang Pembuat](#-tentang-pembuat)
-10. [Lisensi](#-lisensi)
+   - [Tahap Preprocessing](#-evaluasi-model)
+   - [Tahap Preprocessing](#-insights-penting)
+7. [Tentang Pembuat](#-tentang-pembuat)
+8. [Lisensi](#-lisensi)
 
 ---
 
@@ -168,7 +172,26 @@ source .venv/bin/activate
 
 #### 3. **Install Dependensi**
 
+Pilih salah satu dari dua cara berikut:
+
+**Opsi A: Menggunakan PDM (Recommended)**
+
+Jika Anda sudah memiliki PDM terinstal, gunakan `pyproject.toml` untuk dependency management yang lebih robust:
+
 ```bash
+# Install PDM (jika belum tersedia)
+pip install pdm
+
+# Install dependencies dari pyproject.toml
+pdm install
+```
+
+**Opsi B: Menggunakan pip dan requirements.txt**
+
+Untuk setup yang lebih sederhana dengan pip, gunakan `requirements.txt` yang sudah diekspor dari `pyproject.toml`:
+
+```bash
+# Install dependencies dari requirements.txt
 pip install -r requirements.txt
 ```
 
@@ -192,6 +215,7 @@ streamlit run app.py
 ```
 
 Aplikasi akan terbuka di browser pada `http://localhost:8501`
+
 
 ### Interface Aplikasi
 
@@ -217,6 +241,11 @@ Aplikasi akan terbuka di browser pada `http://localhost:8501`
    - Informasi dataset
    - Penjelasan model architecture
    - Link ke code repository
+
+### Coba Versi Deploy
+
+- Buka [https://machine-learning-classification-weather.streamlit.app/](https://machine-learning-classification-weather.streamlit.app/)
+
 
 ### Struktur File Proyek
 
@@ -307,78 +336,14 @@ Machine-Learning-UAP/
 
 #### Confusion Matrix (ResNet50)
 
-```
-              Dew  Fog  Fro  Gla  Hai  Lig  Rai  Rai  Rim  San  Sno
-Dew          [210]  2    1    0    1    0    2    0    8    0    10
-Fog            1  [155]  2    5    0    0   12    0   10    3    2
-Frost          1    2  [190]  8    0    0    1    0    8    0    2
-Glaze          0    3   14  [131]   2    0    0    0    3    0    3
-...
-```
+Di bawah ini adalah confusion matrix untuk ketiga model.
+
+| **CNN Base** | **Mobilenet** | **Resnet** |
+|---------|---------|-------------------|
+| ![Confusion CNN Base]() | ![Confusion Matrix Mobilenet]() | ![Confusion Matrix Resnet]() |
 
 ---
 
-## 💻 Demo Streamlit
-
-### Fitur-Fitur Utama Aplikasi
-
-#### **1. Real-time Prediction**
-
-- Upload gambar cuaca
-- Pilih salah satu dari 3 model yang tersedia
-- Dapatkan hasil prediksi instant dengan confidence score
-
-#### **2. Advanced Visualization**
-
-- Bar chart perbandingan confidence score untuk setiap kategori
-- Heatmap untuk melihat area fokus model
-- ROC curves dan AUC analysis
-
-#### **3. Model Analytics**
-
-- Perbandingan performa 3 model side-by-side
-- Confusion matrix visualization
-- Classification report detail
-
-#### **4. Responsive Design**
-
-- Dark mode support
-- Mobile-friendly interface
-- Dynamic color extraction dari input image
-- Real-time feedback dan progress indicator
-
-### Cara Menggunakan Demo
-
-```bash
-# 1. Pastikan dependensi sudah terinstall
-pip install -r requirements.txt
-
-# 2. Navigate ke folder src
-cd src
-
-# 3. Jalankan aplikasi
-streamlit run app.py
-
-# 4. Buka browser → http://localhost:8501
-# 5. Upload gambar cuaca → Lihat prediksi instant
-```
-
----
-
-## 🌐 Link Demo Live
-
-- **Repository**: [github.com/lutfiindraa/Machine-Learning-UAP](https://github.com/lutfiindraa/Machine-Learning-UAP)
-- **GitHub Pages**: Dokumentasi lengkap tersedia di repository
-- **Deployment**: Siap untuk deployment ke Streamlit Cloud, Heroku, atau platform cloud lainnya
-
-### Instruksi Deploy ke Streamlit Cloud
-
-1. Push code ke GitHub
-2. Buka [streamlit.io/cloud](https://streamlit.io/cloud)
-3. Connect GitHub repository
-4. Deploy → aplikasi live dalam hitungan menit
-
----
 
 ## 👨‍💻 Tentang Pembuat
 
