@@ -11,17 +11,18 @@ Sistem klasifikasi otomatis untuk mengenali **11 jenis kondisi cuaca** dari gamb
 
 ## 📋 Daftar Isi
 
-- [Tentang Proyek](#tentang-proyek)
-- [Fitur Utama](#fitur-utama)
-- [Dataset](#dataset)
-- [Preprocessing & Pemodelan](#preprocessing--pemodelan)
-- [Instalasi](#instalasi)
-- [Cara Menggunakan](#cara-menggunakan)
-- [Hasil & Analisis Model](#hasil--analisis-model)
-- [Demo Streamlit](#demo-streamlit)
-- [Link Demo Live](#link-demo-live)
-- [Tentang Pembuat](#tentang-pembuat)
-- [Lisensi](#lisensi)
+1. [Tentang Proyek](#tentang-proyek)
+   - [Latar Belakang Masalah](#latar-belakang-masalah)
+   - [Tujuan Pengembangan](#tujuan-pengembangan)
+2. [Dataset](#dataset)
+3. [Preprocessing & Pemodelan](#preprocessing--pemodelan)
+4. [Instalasi](#instalasi)
+5. [Cara Menggunakan](#cara-menggunakan)
+6. [Hasil & Analisis Model](#hasil--analisis-model)
+7. [Demo Streamlit](#demo-streamlit)
+8. [Link Demo Live](#link-demo-live)
+9. [Tentang Pembuat](#tentang-pembuat)
+10. [Lisensi](#lisensi)
 
 ---
 
@@ -381,14 +382,14 @@ streamlit run app.py
 
 ## 👨‍💻 Tentang Pembuat
 
-### **Lutfi Indra Adinaata**
+### **Lutfi Indra Nur Praditya**
 
-- **Institusi**: [Universitas Indonesia / Institusi Pendidikan Anda]
+- **Institusi**: [Universitas Muhammadiyah Malang]
 - **Program**: Pembelajaran Mesin (Machine Learning) - Semester 7
 - **Fokus**: Deep Learning, Computer Vision, dan Practical AI Applications
-- **Email**: [email@example.com]
+- **Email**: [lutfiindra958@gmail.com]
 - **GitHub**: [github.com/lutfiindraa](https://github.com/lutfiindraa)
-- **LinkedIn**: [linkedin.com/in/lutfiindra](https://linkedin.com/in/lutfiindra)
+- **LinkedIn**: [linkedin.com/in/lutfiindra](-)
 
 ### Motivasi Proyek
 
